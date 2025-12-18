@@ -1,21 +1,13 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getDatabase, ref, set, push, onValue, remove, update, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
+import firebaseConfig from "./firebase-config.js";
 
 // Initialize EmailJS for sending emails
 emailjs.init('moNqooJGlXiG7Cm8i');
 
 // Firebase configuration - REPLACE WITH YOUR CONFIG
-const firebaseConfig = {
-    apiKey: "AIzaSyBJ6T3Ylv1k7DC_5iTS92Dm1ilfVQOfXLs",
-    authDomain: "habit-tracker-84d7b.firebaseapp.com",
-    databaseURL: "https://habit-tracker-84d7b-default-rtdb.firebaseio.com",
-    projectId: "habit-tracker-84d7b",
-    storageBucket: "habit-tracker-84d7b.firebasestorage.app",
-    messagingSenderId: "550878240594",
-    appId: "1:550878240594:web:a751ae42aec758e3a3648b"
-};
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
