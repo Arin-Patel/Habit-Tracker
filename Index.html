@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Style.css">
+    <title>Habit Tracker</title>
+  
+</head>
+<body>
+ <div class="container">
+        <header>
+            <h1>🎯 Habit Tracker</h1>
+            <p>Build better habits, one day at a time</p>
+        </header>
+
+        <!-- Authentication Section -->
+        <div id="authSection" class="auth-section">
+            <div id="loginForm">
+                <h2>Login</h2>
+                <div class="error-message" id="loginError"></div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button onclick="login()">Login</button>
+                <div class="toggle-auth">
+                    Don't have an account? <a onclick="toggleAuth()">Sign Up</a>
+                </div>
+            </div>
+
+            <div id="signupForm" style="display: none;">
+                <h2>Sign Up</h2>
+                <div class="error-message" id="signupError"></div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••">
+                </div>
+                <button onclick="signup()">Sign Up</button>
+                <div class="toggle-auth">
+                    Already have an account? <a onclick="toggleAuth()">Login</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="main-content">
+            <div class="user-info">
+                <span>👤 <span id="userEmail"></span></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="dashboard">
+                <div class="add-habit-card">
+                    <h2>Add New Habit</h2>
+                    <div class="success-message" id="addHabitSuccess"></div>
+                    <div class="form-group">
+                        <label>Habit Name</label>
+                        <input type="text" id="habitName" placeholder="e.g., Morning Exercise">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="habitDescription" placeholder="Why is this habit important to you?"></textarea>
+                    </div>
+                    <button onclick="addHabit()">Add Habit</button>
+                </div>
+
+                <div class="habits-list">
+                    <h2>My Habits</h2>
+                    <div id="habitsList"></div>
+                </div>
+            </div>
+
+            <div class="statistics-card">
+                <h2>Statistics & Progress</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalHabits">0</div>
+                        <div class="stat-label">Total Habits</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="completedToday">0</div>
+                        <div class="stat-label">Completed Today</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="currentStreak">0</div>
+                        <div class="stat-label">Current Streak</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="completionRate">0%</div>
+                        <div class="stat-label">Completion Rate</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 15px; color: #667eea;">Last 7 Days Progress</h3>
+                    <div class="chart-bars" id="chartBars"></div>
+                </div>
+            </div>
+
+            <div class="notification-settings">
+                <h3>📧 Email Notification Settings</h3>
+                
+                <div class="notification-info">
+                    <p><strong>📬 How it works:</strong></p>
+                    <p>• You'll receive a daily email reminder at your chosen time</p>
+                    <p>• The email will list all incomplete habits for the day</p>
+                    <p>• Emails are sent automatically before 11 PM</p>
+                    <p>• You can change the reminder time anytime</p>
+                </div>
+
+                <div class="form-group">
+                    <label>📧 Notification Email</label>
+                    <input type="email" id="notificationEmail" placeholder="your@email.com">
+                    <div class="timezone-info">We'll use the email from your account by default</div>
+                </div>
+
+                <div class="form-group">
+                    <label>⏰ Daily Reminder Time</label>
+                    <input type="time" id="reminderTime" value="20:00">
+                    <div class="timezone-info" id="timezoneInfo"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>🌍 Your Timezone</label>
+                    <select id="timezoneSelect"></select>
+                </div>
+
+                <button onclick="saveNotificationSettings()" id="saveNotifBtn">💾 Save Email Notification Settings</button>
+
+                <div class="notification-status" id="notificationStatus" style="display: none;">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span id="statusText"></span>
+                </div>
+
+                <div class="success-message" id="notifSuccess"></div>
+                <div class="error-message" id="notifError"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <script type="module" src="Script.js"></script>
+</body>
+</html>
