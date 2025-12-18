@@ -222,36 +222,72 @@ window.deleteHabit = async function (habitId) {
 };
 
 function updateStatistics() {
-    const today = new Date().toDateString();
+    // 1. Setup normalized "Today" for accurate day-diff math
+    const today = new Date();
+    const todayStr = today.toDateString();
+    
+    // Create a version of today at midnight to compare against
+    const startOfToday = new Date(today);
+    startOfToday.setHours(0, 0, 0, 0);
+
     let totalHabits = Object.keys(habits).length;
-    let completedToday = 0;
+    let completedTodayCount = 0;
     let totalCompletions = 0;
     let possibleCompletions = 0;
 
+    // 2. Initialize last 7 days array (Index 6 = Today, Index 0 = 6 days ago)
+    const last7Days = Array(7).fill(0);
+
     Object.values(habits).forEach(habit => {
-        if (habit.completions && habit.completions[today]) {
-            completedToday++;
-        }
         if (habit.completions) {
-            totalCompletions += Object.keys(habit.completions).length;
+            Object.keys(habit.completions).forEach(dateStr => {
+                const completionDate = new Date(dateStr);
+                completionDate.setHours(0, 0, 0, 0);
+
+                // Calculate difference in days
+                const diffTime = startOfToday - completionDate;
+                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                // If the completion is within the last 7 days (0 to 6)
+                if (diffDays >= 0 && diffDays < 7) {
+                    last7Days[6 - diffDays]++; 
+                }
+
+                // Check specifically for today's completion
+                if (dateStr === todayStr) {
+                    completedTodayCount++;
+                }
+
+                totalCompletions++;
+            });
         }
-        const daysSinceCreation = Math.ceil((Date.now() - habit.createdAt) / (1000 * 60 * 60 * 24));
+
+        // 3. Calculate Possible Completions (for completion rate %)
+        // Uses the date the habit was created
+        const createdAt = new Date(habit.createdAt);
+        createdAt.setHours(0, 0, 0, 0);
+        const daysSinceCreation = Math.max(1, Math.ceil((startOfToday - createdAt) / (1000 * 60 * 60 * 24)) + 1);
+        
         possibleCompletions += daysSinceCreation;
     });
 
+    // 4. Calculate Final Stats
     const completionRate = possibleCompletions > 0
         ? Math.round((totalCompletions / possibleCompletions) * 100)
         : 0;
 
-    let currentStreak = calculateCurrentStreak();
+    const currentStreak = calculateCurrentStreak();
 
+    // 5. Update the UI
     document.getElementById('totalHabits').textContent = totalHabits;
-    document.getElementById('completedToday').textContent = completedToday;
+    document.getElementById('completedToday').textContent = completedTodayCount;
     document.getElementById('currentStreak').textContent = currentStreak;
     document.getElementById('completionRate').textContent = completionRate + '%';
 
-    renderChart();
+    // 6. Pass normalized data to your chart
+    renderChart(last7Days);
 }
+
 
 function calculateCurrentStreak() {
     let streak = 0;
@@ -278,35 +314,40 @@ function calculateCurrentStreak() {
     return streak;
 }
 
-function renderChart() {
-    const chartBars = document.getElementById('chartBars');
-    chartBars.innerHTML = '';
-
-    for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toDateString();
-
-        let completed = 0;
-        Object.values(habits).forEach(habit => {
-            if (habit.completions && habit.completions[dateStr]) {
-                completed++;
-            }
-        });
-
-        const total = Object.keys(habits).length || 1;
-        const percentage = (completed / total) * 100;
-        const height = percentage || 10;
-
-        const barContainer = document.createElement('div');
-        barContainer.style.flex = '1';
-        barContainer.innerHTML = `
-                    <div class="chart-bar" style="height: ${height}%"></div>
-                    <div class="chart-label">${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                `;
-        chartBars.appendChild(barContainer);
+function renderChart(data = []) {
+    const chartBars = document.getElementById("chartBars");
+    if (!Array.isArray(data)) {
+        console.warn("Chart data invalid, resetting:", data);
+        data = [];
     }
+
+
+    if (!chartBars) {
+        console.error("chartBars div not found");
+        return;
+    }
+
+    chartBars.innerHTML = "";
+
+    const max = Math.max(...data, 1);
+
+    data.forEach((value, i) => {
+        const wrap = document.createElement("div");
+
+        const bar = document.createElement("div");
+        bar.className = "chart-bar";
+        bar.style.height = `${(value / max) * 100}%`;
+
+        const label = document.createElement("div");
+        label.className = "chart-label";
+        label.innerText = `Day ${i + 1}`;
+
+        wrap.appendChild(bar);
+        wrap.appendChild(label);
+        chartBars.appendChild(wrap);
+    });
 }
+
 
 // Notification Settings
 window.saveNotificationSettings = async function () {
@@ -364,8 +405,7 @@ window.saveNotificationSettings = async function () {
     }
 };
 
-window.sendDailyReminderEmail = async function()
- {
+window.sendDailyReminderEmail = async function () {
     if (!currentUser) {
         console.warn("No user logged in. Skipping email.");
         return;
